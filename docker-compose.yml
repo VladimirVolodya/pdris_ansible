@@ -1,0 +1,26 @@
+version: "3.5"
+services:
+  healchecker1:
+    image: vladimirvolodya/sber_dnd_healthchecker:v0.1
+    container_name: healchecker1
+    volumes:
+      - /home/vsm/sber_dnd/log1.log:/var/log/healchecker2.log
+    environment:
+      - IP_TO_CHECK=healchecker2
+    restart: unless-stopped
+    networks:
+      - internal_network
+  healchecker2:
+    image: vladimirvolodya/sber_dnd_healthchecker:v0.1
+    container_name: healchecker2
+    volumes:
+      - /home/vsm/sber_dnd/log2.log:/var/log/healchecker1.log
+    environment:
+      - IP_TO_CHECK=healchecker1
+    restart: unless-stopped
+    networks:
+      - internal_network
+networks:
+  internal_network:
+    name: internal_network
+    driver: bridge

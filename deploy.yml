@@ -1,0 +1,52 @@
+- name: deploy new version
+  hosts: all
+  tasks:
+    - name: install git
+      ansible.builtin.yum:
+        name: git
+        state: latest
+
+    - name: install python3
+      ansible.builtin.yum:
+        name: python3
+        state: latest
+
+    - name: install docker
+      ansible.builtin.yum:
+        name: docker-ce
+        state: latest
+      ansible.builtin.yum:
+        name: docker-ce-cli
+        state: latest
+      ansible.builtin.yum:
+        name: containerd.io
+        state: latest
+      ansible.builtin.yum:
+        name: docker-buildx-plugin
+        state: latest
+      ansible.builtin.yum:
+        name: docker-compose-plugin
+        state: latest
+    - name: run docker
+      ansible.builtin.shell:
+        cmd: sudo systemctl start docker
+
+    - name: clone repo
+      ansible.builtin.git:
+        repo: https://github.com/VladimirVolodya/pdris_ansible.git
+        dest: /home/vsm/dnd
+
+    - name: build image
+      community.docker.docker_image:
+        build:
+          path: /home/vsm/dnd
+        name: vladimirvolodya/sber_dnd_healthchecker
+        tag: v0.1
+        source: build
+
+- name: run app
+  hosts: all
+  tasks:
+    - name: compose up
+      community.docker.docker_compose:
+        project_src: /home/vsm/dnd
